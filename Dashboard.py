@@ -3,10 +3,10 @@ import matplotlib as plt
 import seaborn as sn
 import streamlit as st
 
-customer=pd.read_csv('D:\\Dashboard\\dashboard\customer_df.csv')
-new_order_review=pd.read_csv('D:\\Dashboard\\dashboard\\new_order_reviews_df.csv')
-order_payments=pd.read_csv('D:\\Dashboard\\dashboard\\order_payments_df.csv')
-orders=pd.read_csv('D:\\Dashboard\\dashboard\\orders_df.csv')
+customer=pd.read_csv('customer_df.csv')
+new_order_review=pd.read_csv('new_order_reviews_df.csv')
+order_payments=pd.read_csv('order_payments_df.csv')
+orders=pd.read_csv('orders_df.csv')
 
 
 with st.sidebar:
