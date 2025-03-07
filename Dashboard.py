@@ -10,7 +10,7 @@ orders=pd.read_csv('orders_df.csv')
 
 
 with st.sidebar:
-    st.image('D:\\Dashboard\\dashboard\\ecomerce.png')
+    st.image('ecomerce.png')
 
 st.header('E-Commerce')
 
