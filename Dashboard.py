@@ -55,6 +55,8 @@ if "Negara Customers" in visualization_options:
     plt.figure(figsize=(12, 7))
     sn.barplot(x="customer_state", y="customer_count", data=bystate_df.sort_values(by="customer_count", ascending=False), color="#72BCD4")
     plt.title("Jumlah Customers Berdasarkan Negara", loc="center", fontsize=16)
+    plt.xlabel("")
+    plt.ylabel("")
     st.pyplot(plt)
 
 if "Kota Customers" in visualization_options:
@@ -67,6 +69,9 @@ if "Kota Customers" in visualization_options:
     plt.figure(figsize=(12, 7))
     sn.barplot(x="customer_city", y="customer_count", data=top_10_bystate_df, color="#72BCD4")
     plt.title("Top 10 Jumlah Customers Berdasarkan Kota", loc="center", fontsize=16)
+    plt.xticks(rotation=55)
+    plt.xlabel("")
+    plt.ylabel("")
     st.pyplot(plt)
 
 if "Score Reviews" in visualization_options:
@@ -76,6 +81,8 @@ if "Score Reviews" in visualization_options:
     plt.figure(figsize=(7, 5))
     sn.barplot(x="review_score", y="review_id", data=review, color="#72BCD4")
     plt.title("Review Score dari Customers", loc="center", fontsize=16)
+    plt.xlabel("")
+    plt.ylabel("")
     st.pyplot(plt)
 
 if "Metode Pembayaran" in visualization_options:
@@ -85,6 +92,9 @@ if "Metode Pembayaran" in visualization_options:
     plt.figure(figsize=(5, 5))
     sn.barplot(x="payment_type", y="order_id", data=pay_type, color="#72BCD4")
     plt.title("Metode Pembayaran dari Customers", loc="center", fontsize=16)
+    plt.xticks(rotation=55)
+    plt.xlabel("")
+    plt.ylabel("")
     st.pyplot(plt)
 
 if "Status Order" in visualization_options:
@@ -94,6 +104,9 @@ if "Status Order" in visualization_options:
     plt.figure(figsize=(7, 5))
     sn.barplot(x="order_status", y="order_id", data=order_stat, color="#72BCD4")
     plt.title("Status Order Customers", loc="center", fontsize=16)
+    plt.xticks(rotation=55)
+    plt.xlabel("")
+    plt.ylabel("")
     st.pyplot(plt)
 
    
