@@ -14,70 +14,63 @@ st.sidebar.image('ecomerce.png')
 
 # Select Visualization
 visualization_options = st.sidebar.multiselect("Select Visualization", 
-    ["Customer by Country", "Customer by City", "Review Scores", "Payment Methods", "Order Status"])
+    ["Negara Customers", "Kota Customers", "Score Reviews", "Metode Pembayaran", "Status Order"])
 
 # Initialize filters
-payment_types = order_payments['payment_type'].unique().tolist()
-review_scores = new_order_review['review_score'].unique().tolist()
-customer_states = customer['customer_state'].unique().tolist()
-customer_cities = customer['customer_city'].unique().tolist()
-order_statuses = orders['order_status'].unique().tolist()
+selected_payment_type = []
+selected_review_score = []
+selected_state = []
+selected_city = []
+selected_order_status = []
 
-# Function to add "All" option
-def add_all_option(options):
-    return ["All"] + options
+# Show filters based on selected visualizations
+if "Negara Customers" in visualization_options:
+    selected_state = st.sidebar.multiselect("Select Customer State", customer['customer_state'].unique())
 
-# Select filters
-selected_payment_types = st.sidebar.multiselect("Select Payment Type", 
-    add_all_option(payment_types), default=add_all_option(payment_types))
-selected_review_scores = st.sidebar.multiselect("Select Review Score", 
-    add_all_option(review_scores), default=add_all_option(review_scores))
-selected_customer_states = st.sidebar.multiselect("Select Customer State", 
-    add_all_option(customer_states), default=add_all_option(customer_states))
-selected_customer_cities = st.sidebar.multiselect("Select Customer City", 
-    add_all_option(customer_cities), default=add_all_option(customer_cities))
-selected_order_statuses = st.sidebar.multiselect("Select Order Status", 
-    add_all_option(order_statuses), default=add_all_option(order_statuses))
+if "Kota Customers" in visualization_options:
+    selected_city = st.sidebar.multiselect("Select Customer City", 
+        customer[customer['customer_state'].isin(selected_state)]['customer_city'].value_counts().head(10).index)
 
-# Function to handle "All" selection
-def handle_all_selection(selected, options):
-    if "All" in selected:
-        return options
-    return selected
+if "Score Reviews" in visualization_options:
+    selected_review_score = st.sidebar.multiselect("Select Review Score", new_order_review['review_score'].unique())
+
+if "Metode Pembayaran" in visualization_options:
+    selected_payment_type = st.sidebar.multiselect("Select Payment Type", order_payments['payment_type'].unique())
+
+if "Status Order" in visualization_options:
+    selected_order_status = st.sidebar.multiselect("Select Order Status", orders['order_status'].unique())
 
 # Filter data based on selections
-filtered_orders = orders[orders['order_status'].isin(handle_all_selection(selected_order_statuses, order_statuses))]
-filtered_payments = order_payments[order_payments['payment_type'].isin(handle_all_selection(selected_payment_types, payment_types))]
-filtered_reviews = new_order_review[new_order_review['review_score'].isin(handle_all_selection(selected_review_scores, review_scores))]
-filtered_customers = customer[customer['customer_state'].isin(handle_all_selection(selected_customer_states, customer_states)) & 
-                              customer['customer_city'].isin(handle_all_selection(selected_customer_cities, customer_cities))]
+filtered_customers = customer[customer['customer_state'].isin(selected_state)]
+filtered_orders = orders[orders['order_status'].isin(selected_order_status)]
+filtered_payments = order_payments[order_payments['payment_type'].isin(selected_payment_type)]
+filtered_reviews = new_order_review[new_order_review['review_score'].isin(selected_review_score)]
 
-# Display selected visualizations
-if "Customer by Country" in visualization_options:
-    st.subheader('Negara Customer')
+# Render visualizations based on selected options
+if "Negara Customers" in visualization_options:
+    st.header('Negara Customers')
     bystate_df = filtered_customers.groupby(by="customer_state").customer_id.nunique().reset_index()
     bystate_df.rename(columns={"customer_id": "customer_count"}, inplace=True)
 
     plt.figure(figsize=(12, 7))
-    sn.barplot(x="customer_state", y="customer_count", data=bystate_df.sort_values(by="customer_count", ascending=False), palette="Blues")
+    sn.barplot(x="customer_state", y="customer_count", data=bystate_df.sort_values(by="customer_count", ascending=False), color="#72BCD4")
     plt.title("Jumlah Customers Berdasarkan Negara", loc="center", fontsize=16)
     st.pyplot(plt)
 
-if "Customer by City" in visualization_options:
-    st.subheader('Kota Customer')
-    bystate_df = filtered_customers.groupby(by="customer_city").customer_id.nunique().reset_index()
-    bystate_df.rename(columns={"customer_id": "customer_count"}, inplace=True)
+if "Kota Customers" in visualization_options:
+    st.header('Kota Customers')
+    bycity_df = filtered_customers.groupby(by="customer_city").customer_id.nunique().reset_index()
+    bycity_df.rename(columns={"customer_id": "customer_count"}, inplace=True)
 
-    top_10_bystate_df = bystate_df.sort_values(by="customer_count", ascending=False).head(10)
+    top_10_bystate_df = bycity_df.sort_values(by="customer_count", ascending=False).head(10)
 
     plt.figure(figsize=(12, 7))
-    sn.barplot(x="customer_city", y="customer_count", data=top_10_bystate_df, palette="Blues")
+    sn.barplot(x="customer_city", y="customer_count", data=top_10_bystate_df, color="#72BCD4")
     plt.title("Top 10 Jumlah Customers Berdasarkan Kota", loc="center", fontsize=16)
-    plt.xticks(rotation=55)
     st.pyplot(plt)
 
-if "Review Scores" in visualization_options:
-    st.subheader('Score Reviews')
+if "Score Reviews" in visualization_options:
+    st.header('Score Reviews')
     review = filtered_reviews.groupby(by="review_score").review_id.count().sort_values(ascending=False).reset_index()
 
     plt.figure(figsize=(7, 5))
@@ -85,8 +78,8 @@ if "Review Scores" in visualization_options:
     plt.title("Review Score dari Customers", loc="center", fontsize=16)
     st.pyplot(plt)
 
-if "Payment Methods" in visualization_options:
-    st.subheader('Metode Pembayaran')
+if "Metode Pembayaran" in visualization_options:
+    st.header('Metode Pembayaran')
     pay_type = filtered_payments.groupby(by="payment_type").order_id.count().sort_values(ascending=False).reset_index()
 
     plt.figure(figsize=(5, 5))
@@ -94,8 +87,8 @@ if "Payment Methods" in visualization_options:
     plt.title("Metode Pembayaran dari Customers", loc="center", fontsize=16)
     st.pyplot(plt)
 
-if "Order Status" in visualization_options:
-    st.subheader('Status Order')
+if "Status Order" in visualization_options:
+    st.header('Status Order')
     order_stat = filtered_orders.groupby(by="order_status").order_id.count().sort_values(ascending=False).reset_index()
 
     plt.figure(figsize=(7, 5))
