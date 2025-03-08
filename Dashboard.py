@@ -13,6 +13,9 @@ orders = pd.read_csv('orders_df.csv')
 with st.sidebar:
     st.image('ecomerce.png')
     
+    # Table selection
+    table_selection = st.selectbox("Select Table to View", ["Customer Data", "Order Reviews", "Order Payments", "Orders"])
+    
     # Payment type filter
     payment_types = order_payments['payment_type'].unique()
     selected_payment_type = st.multiselect("Select Payment Type", payment_types, default=payment_types.tolist())
@@ -25,9 +28,8 @@ with st.sidebar:
     customer_states = customer['customer_state'].unique()
     selected_state = st.multiselect("Select Customer State", customer_states, default=customer_states.tolist())
     
-    # Customer city filter
-    customer_cities = customer['customer_city'].unique()
-    selected_city = st.multiselect("Select Customer City", customer_cities, default=customer_cities.tolist())
+    # Customer city filter (initially empty, will be populated later)
+    selected_city = st.multiselect("Select Customer City", [], default=[])
     
     # Order status filter
     order_statuses = orders['order_status'].unique()
@@ -37,10 +39,29 @@ with st.sidebar:
 filtered_orders = orders[orders['order_status'].isin(selected_order_status)]
 filtered_payments = order_payments[order_payments['payment_type'].isin(selected_payment_type)]
 filtered_reviews = new_order_review[new_order_review['review_score'].isin(selected_review_score)]
-filtered_customers = customer[customer['customer_state'].isin(selected_state) & customer['customer_city'].isin(selected_city)]
+filtered_customers = customer[customer['customer_state'].isin(selected_state)]
+
+# Update city filter based on filtered customers
+if not filtered_customers.empty:
+    top_10_cities = filtered_customers.groupby('customer_city').customer_id.nunique().nlargest(10).index.tolist()
+    selected_city = st.multiselect("Select Customer City", top_10_cities, default=top_10_cities)
 
 # E-Commerce Header
 st.header('E-Commerce')
+
+# Display selected table
+if table_selection == "Customer Data":
+    st.subheader("Customer Data")
+    st.dataframe(filtered_customers)
+elif table_selection == "Order Reviews":
+    st.subheader("Order Reviews")
+    st.dataframe(filtered_reviews)
+elif table_selection == "Order Payments":
+    st.subheader("Order Payments")
+    st.dataframe(filtered_payments)
+elif table_selection == "Orders":
+    st.subheader("Orders")
+    st.dataframe(filtered_orders)
 
 # Customer by State
 st.subheader('Negara Customer')
@@ -68,7 +89,7 @@ st.subheader('Kota Customer')
 bystate_df = filtered_customers.groupby(by="customer_city").customer_id.nunique().reset_index()
 bystate_df.rename(columns={"customer_id": "customer_count"}, inplace=True)
 
-top_10_bystate_df = bystate_df.sort_values(by="customer_count", ascending=False).head(10)
+top_10_bystate_df = bystate_df[bystate_df['customer_city'].isin(selected_city)].sort_values(by="customer_count", ascending=False).head(10)
 
 plt.figure(figsize=(12, 7))
 colors = ["#72BCD4"] + ["#D3D3D3"] * (len(top_10_bystate_df) - 1)
